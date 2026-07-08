@@ -51,27 +51,21 @@ export class Seller {
 
   suspend(): void {
     if (this.status !== SellerStatus.APPROVED) {
-      throw new InvalidSellerStatusError(
-        'Seller cannot be approved from different state of approved',
-      );
+      throw new InvalidSellerStatusError('Seller cannot be suspended from current status');
     }
     this.status = SellerStatus.SUSPENDED;
   }
 
   reject(): void {
-    if (this.status !== SellerStatus.UNDER_REVIEW || SellerStatus.PENDING) {
-      throw new InvalidSellerStatusError(
-        'Seller cannot be rejected from different state of under review or pending',
-      );
+    if (this.status !== SellerStatus.UNDER_REVIEW && this.status !== SellerStatus.PENDING) {
+      throw new InvalidSellerStatusError('Seller cannot be rejected from current status');
     }
     this.status = SellerStatus.REJECTED;
   }
 
   reactivate(): void {
     if (this.status !== SellerStatus.SUSPENDED) {
-      throw new InvalidSellerStatusError(
-        'Seller cannot be reactive from different state of suspended',
-      );
+      throw new InvalidSellerStatusError('Seller cannot be reactivated from current status');
     }
     this.status = SellerStatus.APPROVED;
   }

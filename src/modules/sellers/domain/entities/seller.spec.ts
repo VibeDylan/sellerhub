@@ -52,4 +52,70 @@ describe('Seller', () => {
 
     expect(() => seller.approve()).toThrow('Seller cannot be approved from current status');
   });
+
+  it('should suspend an approved seller', () => {
+    const seller = Seller.reconstitute(
+      new SellerId('seller-123'),
+      new SellerEmail('seller@test.com'),
+      SellerStatus.APPROVED,
+      new Date(),
+    );
+
+    seller.suspend();
+
+    expect(seller.sellerStatus).toBe(SellerStatus.SUSPENDED);
+  });
+
+  it('should not suspend a pending seller', () => {
+    const seller = createSeller();
+
+    expect(() => seller.suspend()).toThrow('Seller cannot be suspended from current status');
+  });
+
+  it('should reject a pending seller', () => {
+    const seller = createSeller();
+
+    seller.reject();
+
+    expect(seller.sellerStatus).toBe(SellerStatus.REJECTED);
+  });
+
+  it('should reject a seller under review', () => {
+    const seller = createSeller();
+
+    seller.submitForReview();
+    seller.reject();
+
+    expect(seller.sellerStatus).toBe(SellerStatus.REJECTED);
+  });
+
+  it('should not reject an approved seller', () => {
+    const seller = Seller.reconstitute(
+      new SellerId('seller-123'),
+      new SellerEmail('seller@test.com'),
+      SellerStatus.APPROVED,
+      new Date(),
+    );
+
+    expect(() => seller.reject()).toThrow('Seller cannot be rejected from current status');
+  });
+
+  it('should reactivate a suspended seller', () => {
+    const seller = Seller.reconstitute(
+      new SellerId('seller-123'),
+      new SellerEmail('seller@test.com'),
+      SellerStatus.SUSPENDED,
+      new Date(),
+    );
+
+    seller.reactivate();
+
+    expect(seller.sellerStatus).toBe(SellerStatus.APPROVED);
+  });
+
+  it('should not reactivate a pending seller', () => {
+    const seller = createSeller();
+
+    expect(() => seller.reactivate()).toThrow('Seller cannot be reactivated from current status');
+  });
 });
