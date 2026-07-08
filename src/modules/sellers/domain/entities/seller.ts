@@ -38,6 +38,13 @@ export class Seller {
         this.status = SellerStatus.UNDER_REVIEW
     }
 
+    approve(): void {
+        if(this.status !== SellerStatus.UNDER_REVIEW) {
+            throw new Error("Seller cannot be approved from current status")
+        }
+        this.status = SellerStatus.APPROVED
+    }
+
     get sellerId(): SellerId {
         return this.id;
     }
