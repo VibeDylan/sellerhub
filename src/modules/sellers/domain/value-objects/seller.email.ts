@@ -1,4 +1,7 @@
 export class SellerEmail {
+    private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    private static readonly MAX_EMAIL_LENGTH = 254;
+
     private readonly _value: string;
 
     constructor(value: string) {
@@ -8,7 +11,7 @@ export class SellerEmail {
 
         const normalized = this.normalize(value);
 
-        if (!this.validate(normalized)) {
+        if (!this.isValid(normalized)) {
             throw new Error("SellerEmail is not in valid format");
         }
 
@@ -19,11 +22,11 @@ export class SellerEmail {
         return value.trim().toLowerCase();
     }
 
-    private validate(email: string): boolean {
-        const MAX_EMAIL_LENGTH = 254;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        return email.length <= MAX_EMAIL_LENGTH && emailRegex.test(email);
+    private isValid(email: string): boolean {
+        return (
+            email.length <= SellerEmail.MAX_EMAIL_LENGTH &&
+            SellerEmail.EMAIL_REGEX.test(email)
+        );
     }
 
     equals(other: SellerEmail): boolean {
