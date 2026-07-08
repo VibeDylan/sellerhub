@@ -1,63 +1,55 @@
-import { SellerStatus } from "../enums/seller.status";
-import { SellerId } from "../value-objects/seller-id";
-import { SellerEmail } from "../value-objects/seller.email";
+import { SellerStatus } from '../enums/seller.status';
+import { SellerId } from '../value-objects/seller-id';
+import { SellerEmail } from '../value-objects/seller.email';
 
 export class Seller {
-    private readonly id: SellerId;
-    private email: SellerEmail;
-    private status: SellerStatus;
-    private readonly createdAt: Date;
+  private readonly id: SellerId;
 
-    private constructor(
-        id: SellerId,
-        email: SellerEmail,
-        createdAt: Date
-    ) {
-        this.id = id;
-        this.email = email;
-        this.status = SellerStatus.PENDING;
-        this.createdAt = createdAt;
+  private email: SellerEmail;
+
+  private status: SellerStatus;
+
+  private readonly createdAt: Date;
+
+  private constructor(id: SellerId, email: SellerEmail, createdAt: Date) {
+    this.id = id;
+    this.email = email;
+    this.status = SellerStatus.PENDING;
+    this.createdAt = createdAt;
+  }
+
+  static create(id: SellerId, email: SellerEmail): Seller {
+    return new Seller(id, email, new Date());
+  }
+
+  submitForReview(): void {
+    if (this.status !== SellerStatus.PENDING) {
+      throw new Error('Seller cannot be submitted for review from current status');
     }
 
-    static create(
-        id: SellerId,
-        email: SellerEmail
-    ): Seller {
-        return new Seller(
-            id,
-            email,
-            new Date()
-        );
-    }
+    this.status = SellerStatus.UNDER_REVIEW;
+  }
 
-    submitForReview(): void {
-        if(this.status !== SellerStatus.PENDING) {
-            throw new Error("Seller cannot be submitted for review from current status")
-        }
-
-        this.status = SellerStatus.UNDER_REVIEW
+  approve(): void {
+    if (this.status !== SellerStatus.UNDER_REVIEW) {
+      throw new Error('Seller cannot be approved from current status');
     }
+    this.status = SellerStatus.APPROVED;
+  }
 
-    approve(): void {
-        if(this.status !== SellerStatus.UNDER_REVIEW) {
-            throw new Error("Seller cannot be approved from current status")
-        }
-        this.status = SellerStatus.APPROVED
-    }
+  get sellerId(): SellerId {
+    return this.id;
+  }
 
-    get sellerId(): SellerId {
-        return this.id;
-    }
+  get sellerEmail(): SellerEmail {
+    return this.email;
+  }
 
-    get sellerEmail(): SellerEmail {
-        return this.email;
-    }
+  get sellerStatus(): SellerStatus {
+    return this.status;
+  }
 
-    get sellerStatus(): SellerStatus {
-        return this.status;
-    }
-
-    get creationDate(): Date {
-        return this.createdAt;
-    }
+  get creationDate(): Date {
+    return this.createdAt;
+  }
 }

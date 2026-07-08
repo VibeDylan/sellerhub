@@ -1,39 +1,37 @@
 export class SellerEmail {
-    private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    private static readonly MAX_EMAIL_LENGTH = 254;
+  private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    private readonly _value: string;
+  private static readonly MAX_EMAIL_LENGTH = 254;
 
-    constructor(value: string) {
-        if (!value?.trim()) {
-            throw new Error("SellerEmail cannot be empty");
-        }
+  private readonly _value: string;
 
-        const normalized = this.normalize(value);
-
-        if (!this.isValid(normalized)) {
-            throw new Error("SellerEmail is not in valid format");
-        }
-
-        this._value = normalized;
+  constructor(value: string) {
+    if (!value?.trim()) {
+      throw new Error('SellerEmail cannot be empty');
     }
 
-    private normalize(value: string): string {
-        return value.trim().toLowerCase();
+    const normalized = this.normalize(value);
+
+    if (!this.isValid(normalized)) {
+      throw new Error('SellerEmail is not in valid format');
     }
 
-    private isValid(email: string): boolean {
-        return (
-            email.length <= SellerEmail.MAX_EMAIL_LENGTH &&
-            SellerEmail.EMAIL_REGEX.test(email)
-        );
-    }
+    this._value = normalized;
+  }
 
-    equals(other: SellerEmail): boolean {
-        return this.value === other.value;
-    }
+  private normalize(value: string): string {
+    return value.trim().toLowerCase();
+  }
 
-    get value(): string {
-        return this._value;
-    }
+  private isValid(email: string): boolean {
+    return email.length <= SellerEmail.MAX_EMAIL_LENGTH && SellerEmail.EMAIL_REGEX.test(email);
+  }
+
+  equals(other: SellerEmail): boolean {
+    return this.value === other.value;
+  }
+
+  get value(): string {
+    return this._value;
+  }
 }
