@@ -4,14 +4,14 @@ import { SellerRepository } from '../ports/seller.repository';
 import { SellerEmail } from '../../domain/value-objects/seller.email';
 import { Seller } from '../../domain/entities/seller';
 
-interface CreateSellerInput {
+interface CreateSellerCommand {
   email: string;
 }
 
 export class CreateSellerUseCase {
   constructor(private readonly sellerRepository: SellerRepository) {}
 
-  async execute(input: CreateSellerInput): Promise<SellerId> {
+  async execute(input: CreateSellerCommand): Promise<SellerId> {
     const sellerId = new SellerId(randomUUID());
     const sellerEmail = new SellerEmail(input.email);
 
