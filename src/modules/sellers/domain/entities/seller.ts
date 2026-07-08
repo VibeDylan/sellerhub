@@ -30,6 +30,14 @@ export class Seller {
         );
     }
 
+    submitForReview(): void {
+        if(this.status !== SellerStatus.PENDING) {
+            throw new Error("Seller cannot be submitted for review from current status")
+        }
+
+        this.status = SellerStatus.UNDER_REVIEW
+    }
+
     get sellerId(): SellerId {
         return this.id;
     }
