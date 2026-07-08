@@ -58,12 +58,14 @@ module.exports = {
 
     'import/prefer-default-export': 'off',
 
-    // Autorise les propriétés privées comme _value dans les Value Objects
+    // Autorise les propriétés privées comme _value dans les Value Objects,
+    // et _id qui est la convention MongoDB pour la clé primaire
     'no-underscore-dangle': [
       'error',
       {
         allow: [
           '_value',
+          '_id',
         ],
         allowAfterThis: true,
       },
