@@ -23,6 +23,15 @@ export class Seller {
     return new Seller(id, email, SellerStatus.PENDING, new Date());
   }
 
+  static reconstitute(
+    id: SellerId,
+    email: SellerEmail,
+    status: SellerStatus,
+    createdAt: Date,
+  ): Seller {
+    return new Seller(id, email, status, createdAt);
+  }
+
   submitForReview(): void {
     if (this.status !== SellerStatus.PENDING) {
       throw new InvalidSellerStatusError(
