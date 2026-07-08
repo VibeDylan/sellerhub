@@ -26,6 +26,10 @@ export class SellerEmail {
         return email.length <= MAX_EMAIL_LENGTH && emailRegex.test(email);
     }
 
+    equals(other: SellerEmail): boolean {
+        return this.value === other.value;
+    }
+
     get value(): string {
         return this._value;
     }
