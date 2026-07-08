@@ -49,6 +49,33 @@ export class Seller {
     this.status = SellerStatus.APPROVED;
   }
 
+  suspend(): void {
+    if (this.status !== SellerStatus.APPROVED) {
+      throw new InvalidSellerStatusError(
+        'Seller cannot be approved from different state of approved',
+      );
+    }
+    this.status = SellerStatus.SUSPENDED;
+  }
+
+  reject(): void {
+    if (this.status !== SellerStatus.UNDER_REVIEW || SellerStatus.PENDING) {
+      throw new InvalidSellerStatusError(
+        'Seller cannot be rejected from different state of under review or pending',
+      );
+    }
+    this.status = SellerStatus.REJECTED;
+  }
+
+  reactivate(): void {
+    if (this.status !== SellerStatus.SUSPENDED) {
+      throw new InvalidSellerStatusError(
+        'Seller cannot be reactive from different state of suspended',
+      );
+    }
+    this.status = SellerStatus.APPROVED;
+  }
+
   get sellerId(): SellerId {
     return this.id;
   }
