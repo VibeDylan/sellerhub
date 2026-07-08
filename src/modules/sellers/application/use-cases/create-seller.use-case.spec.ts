@@ -1,12 +1,17 @@
 import { CreateSellerUseCase } from './create-seller.use-case';
 import { SellerRepository } from '../ports/seller.repository';
 import { Seller } from '../../domain/entities/seller';
+import { SellerId } from '../../domain/value-objects/seller-id';
 
 class InMemorySellerRepository implements SellerRepository {
   public sellers: Seller[] = [];
 
   async save(seller: Seller): Promise<void> {
     this.sellers.push(seller);
+  }
+
+  async findById(id: SellerId): Promise<Seller | null> {
+    return this.sellers.find((seller) => seller.sellerId.equals(id)) ?? null;
   }
 }
 
