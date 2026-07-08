@@ -1,9 +1,11 @@
+import { InvalidSellerIdError } from '../errors/invalid-seller-id.error';
+
 export class SellerId {
   private readonly _value: string;
 
   constructor(value: string) {
     if (!value || value.trim().length === 0) {
-      throw new Error('SellerId cannot be empty');
+      throw new InvalidSellerIdError('SellerId cannot be empty');
     }
 
     this._value = value;

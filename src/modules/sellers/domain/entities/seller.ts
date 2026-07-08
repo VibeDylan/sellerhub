@@ -1,6 +1,7 @@
 import { SellerStatus } from '../enums/seller.status';
 import { SellerId } from '../value-objects/seller-id';
 import { SellerEmail } from '../value-objects/seller.email';
+import { InvalidSellerStatusError } from '../errors/invalid-seller-status.error';
 
 export class Seller {
   private readonly id: SellerId;
@@ -24,7 +25,9 @@ export class Seller {
 
   submitForReview(): void {
     if (this.status !== SellerStatus.PENDING) {
-      throw new Error('Seller cannot be submitted for review from current status');
+      throw new InvalidSellerStatusError(
+        'Seller cannot be submitted for review from current status',
+      );
     }
 
     this.status = SellerStatus.UNDER_REVIEW;
@@ -32,7 +35,7 @@ export class Seller {
 
   approve(): void {
     if (this.status !== SellerStatus.UNDER_REVIEW) {
-      throw new Error('Seller cannot be approved from current status');
+      throw new InvalidSellerStatusError('Seller cannot be approved from current status');
     }
     this.status = SellerStatus.APPROVED;
   }

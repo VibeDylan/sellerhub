@@ -1,3 +1,5 @@
+import { InvalidSellerEmailError } from '../errors/invalid-seller-email.error';
+
 export class SellerEmail {
   private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -7,13 +9,13 @@ export class SellerEmail {
 
   constructor(value: string) {
     if (!value?.trim()) {
-      throw new Error('SellerEmail cannot be empty');
+      throw new InvalidSellerEmailError('SellerEmail cannot be empty');
     }
 
     const normalized = this.normalize(value);
 
     if (!this.isValid(normalized)) {
-      throw new Error('SellerEmail is not in valid format');
+      throw new InvalidSellerEmailError('SellerEmail is not in valid format');
     }
 
     this._value = normalized;
