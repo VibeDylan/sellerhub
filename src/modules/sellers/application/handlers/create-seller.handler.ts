@@ -1,19 +1,16 @@
 import { randomUUID } from 'crypto';
 import { SellerId } from '../../domain/value-objects/seller-id';
+import { CreateSellerCommand } from '../commands/create-seller.command';
 import { SellerRepository } from '../ports/seller.repository';
-import { SellerEmail } from '../../domain/value-objects/seller.email';
 import { Seller } from '../../domain/entities/seller';
+import { SellerEmail } from '../../domain/value-objects/seller.email';
 
-interface CreateSellerCommand {
-  email: string;
-}
-
-export class CreateSellerUseCase {
+export class CreateSellerHandler {
   constructor(private readonly sellerRepository: SellerRepository) {}
 
-  async execute(input: CreateSellerCommand): Promise<SellerId> {
+  async execute(command: CreateSellerCommand): Promise<SellerId> {
     const sellerId = new SellerId(randomUUID());
-    const sellerEmail = new SellerEmail(input.email);
+    const sellerEmail = new SellerEmail(command.email);
 
     const seller = Seller.create(sellerId, sellerEmail);
 

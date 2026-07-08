@@ -1,4 +1,5 @@
-import { CreateSellerUseCase } from './create-seller.use-case';
+import { CreateSellerHandler } from './create-seller.handler';
+import { CreateSellerCommand } from '../commands/create-seller.command';
 import { SellerRepository } from '../ports/seller.repository';
 import { Seller } from '../../domain/entities/seller';
 import { SellerId } from '../../domain/value-objects/seller-id';
@@ -15,14 +16,12 @@ class InMemorySellerRepository implements SellerRepository {
   }
 }
 
-describe('CreateSellerUseCase', () => {
+describe('CreateSellerHandler', () => {
   it('should create and save a seller', async () => {
     const repository = new InMemorySellerRepository();
-    const useCase = new CreateSellerUseCase(repository);
+    const handler = new CreateSellerHandler(repository);
 
-    await useCase.execute({
-      email: 'seller@test.com',
-    });
+    await handler.execute(new CreateSellerCommand('seller@test.com'));
 
     expect(repository.sellers).toHaveLength(1);
     expect(repository.sellers[0].sellerEmail.value).toBe('seller@test.com');
@@ -30,12 +29,8 @@ describe('CreateSellerUseCase', () => {
 
   it('should throw when email is invalid', async () => {
     const repository = new InMemorySellerRepository();
-    const useCase = new CreateSellerUseCase(repository);
+    const handler = new CreateSellerHandler(repository);
 
-    await expect(
-      useCase.execute({
-        email: 'invalid-email',
-      }),
-    ).rejects.toThrow();
+    await expect(handler.execute(new CreateSellerCommand('invalid-email'))).rejects.toThrow();
   });
 });
