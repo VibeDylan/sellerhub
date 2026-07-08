@@ -12,7 +12,7 @@ export class Seller {
 
   private readonly createdAt: Date;
 
-  constructor(id: SellerId, email: SellerEmail) {
+  private constructor(id: SellerId, email: SellerEmail) {
     this.id = id;
     this.email = email;
     this.status = SellerStatus.PENDING;

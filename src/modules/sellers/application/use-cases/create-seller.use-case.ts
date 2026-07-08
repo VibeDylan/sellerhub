@@ -11,12 +11,13 @@ interface CreateSellerInput {
 export class CreateSellerUseCase {
   constructor(private readonly sellerRepository: SellerRepository) {}
 
-  async execute(input: CreateSellerInput): Promise<void> {
+  async execute(input: CreateSellerInput): Promise<SellerId> {
     const sellerId = new SellerId(randomUUID());
     const sellerEmail = new SellerEmail(input.email);
 
-    const seller = new Seller(sellerId, sellerEmail);
+    const seller = Seller.create(sellerId, sellerEmail);
 
     await this.sellerRepository.save(seller);
+    return seller.sellerId;
   }
 }
