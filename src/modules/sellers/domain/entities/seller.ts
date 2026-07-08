@@ -12,15 +12,15 @@ export class Seller {
 
   private readonly createdAt: Date;
 
-  private constructor(id: SellerId, email: SellerEmail) {
+  private constructor(id: SellerId, email: SellerEmail, status: SellerStatus, createdAt: Date) {
     this.id = id;
     this.email = email;
-    this.status = SellerStatus.PENDING;
-    this.createdAt = new Date();
+    this.status = status;
+    this.createdAt = createdAt;
   }
 
   static create(id: SellerId, email: SellerEmail): Seller {
-    return new Seller(id, email);
+    return new Seller(id, email, SellerStatus.PENDING, new Date());
   }
 
   submitForReview(): void {
