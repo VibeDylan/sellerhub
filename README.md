@@ -1,99 +1,75 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# SellerHub
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Projet d'entraînement : une plateforme de gestion de vendeurs marketplace (inspirée du fonctionnement d'une marketplace 3P), construite pour pratiquer Clean Architecture, DDD, CQRS et une architecture event-driven avant une mission réelle sur ce type de sujet.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Stack
 
-## Description
+- **NestJS** / TypeScript
+- **MongoDB** (driver officiel `mongodb`, pas d'ODM)
+- **Kafka** (image officielle `apache/kafka`, mode KRaft, sans Zookeeper)
+- **Jest** pour les tests
+- **Docker Compose** pour l'infra locale (Mongo, Kafka, Kafka UI)
+- ESLint (Airbnb) + Prettier + Husky/lint-staged
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Architecture
 
-## Project setup
+Le code suit une Clean Architecture en 3 couches, module par module (`src/modules/sellers/...`) :
 
-```bash
-$ npm install
+```
+domain/          → règles métier pures, aucune dépendance externe
+  entities/        l'agrégat Seller et son state machine
+  value-objects/   SellerId, SellerEmail (validation encapsulée)
+  enums/           SellerStatus
+  errors/          erreurs métier typées
+
+application/     → orchestration, ne connaît que des abstractions
+  commands/        intentions d'écriture (ex: CreateSellerCommand)
+  handlers/        logique d'exécution d'une command (CQRS write-side)
+  ports/           interfaces (ex: SellerRepository) implémentées par l'infra
+
+infrastructure/  → détails techniques, remplaçables sans toucher au métier
+  persistance/mongo/   implémentation Mongo du port SellerRepository
 ```
 
-## Compile and run the project
+Le principe directeur : le `domain` ne dépend de rien, l'`application` ne dépend que d'abstractions (les `ports`), et l'`infrastructure` implémente ces abstractions. Ça permet de changer de base de données ou de framework HTTP sans toucher à la logique métier.
+
+### Pourquoi `create()` et `reconstitute()` sont deux méthodes séparées sur `Seller`
+
+`create()` encode la règle "un nouveau vendeur est toujours PENDING, créé maintenant" — c'est un événement métier. `reconstitute()` recharge un vendeur déjà existant depuis la persistance, avec son statut et sa date réels, sans réappliquer les règles de création. Mélanger les deux aurait un bug silencieux : relire un vendeur `APPROVED` depuis Mongo écraserait son statut avec `PENDING`.
+
+### Pourquoi CQRS (Command/Handler) plutôt qu'un simple service
+
+Une `Command` (ex: `CreateSellerCommand`) est une donnée qui décrit une intention, sans logique. Un `Handler` (ex: `CreateSellerHandler`) exécute cette intention. Séparer les deux prépare le terrain pour router les commands via un command bus plus tard, et rend chaque écriture explicite et testable indépendamment.
+
+## Lancer le projet
 
 ```bash
-# development
-$ npm run start
+npm install
 
-# watch mode
-$ npm run start:dev
+# Infra locale (Mongo + Kafka + Kafka UI)
+docker compose up -d
 
-# production mode
-$ npm run start:prod
+# Tests
+npm test
+
+# Lint
+npm run lint
 ```
 
-## Run tests
+- Mongo : `localhost:27017`
+- Kafka : `localhost:9092` (broker), `localhost:8080` (Kafka UI)
 
-```bash
-# unit tests
-$ npm run test
+## État actuel
 
-# e2e tests
-$ npm run test:e2e
+- [x] Domain : entité `Seller` avec state machine complet (`submitForReview`, `approve`, `suspend`, `reject`, `reactivate`), Value Objects validés, erreurs métier typées
+- [x] Application : write-side CQRS pour la création d'un vendeur (`CreateSellerCommand` + `CreateSellerHandler`), port `SellerRepository`
+- [x] Infrastructure : `MongoSellerRepository` (save/findById via le driver MongoDB officiel)
+- [x] Infra locale : Mongo + Kafka (KRaft) + Kafka UI via `docker-compose.yml`
+- [ ] Domain Events (`SellerCreatedEvent`, `SellerApprovedEvent`) publiés vers Kafka
+- [ ] Consumer event-driven
+- [ ] API REST (`POST/GET/PATCH /sellers`)
+- [ ] Tests d'intégration (Mongo réel, publication Kafka)
 
-# test coverage
-$ npm run test:cov
-```
+## Hors scope (pour l'instant)
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-# sellerhub
+Authentification/JWT, BigQuery, observabilité (Datadog), Kubernetes, CQRS read-side complet — volontairement écartés pour rester sur un scope réalisable en quelques jours, centré sur la démonstration des patterns d'architecture plutôt que sur la couverture fonctionnelle.
