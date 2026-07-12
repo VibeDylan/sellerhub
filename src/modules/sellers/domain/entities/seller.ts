@@ -2,6 +2,8 @@ import { SellerStatus } from '../enums/seller.status';
 import { SellerId } from '../value-objects/seller-id';
 import { SellerEmail } from '../value-objects/seller.email';
 import { InvalidSellerStatusError } from '../errors/invalid-seller-status.error';
+import { SellerCreatedEvent } from '../events/seller-created.event';
+import { SellerApprovedEvent } from '../events/seller-approved.event';
 
 export class Seller {
   private readonly id: SellerId;
@@ -12,6 +14,8 @@ export class Seller {
 
   private readonly createdAt: Date;
 
+  private domainEvents: (SellerCreatedEvent | SellerApprovedEvent)[] = [];
+
   private constructor(id: SellerId, email: SellerEmail, status: SellerStatus, createdAt: Date) {
     this.id = id;
     this.email = email;
@@ -20,7 +24,15 @@ export class Seller {
   }
 
   static create(id: SellerId, email: SellerEmail): Seller {
-    return new Seller(id, email, SellerStatus.PENDING, new Date());
+    const seller = new Seller(id, email, SellerStatus.PENDING, new Date());
+    seller.domainEvents.push(
+      new SellerCreatedEvent({
+        id: seller.sellerId.value,
+        email: seller.sellerEmail.value,
+        occurredAt: new Date(),
+      }),
+    );
+    return seller;
   }
 
   static reconstitute(
