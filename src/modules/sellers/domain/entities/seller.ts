@@ -100,4 +100,10 @@ export class Seller {
   get creationDate(): Date {
     return this.createdAt;
   }
+
+  pullDomainEvents(): (SellerCreatedEvent | SellerApprovedEvent)[] {
+    const events = this.domainEvents;
+    this.domainEvents = [];
+    return events;
+  }
 }
