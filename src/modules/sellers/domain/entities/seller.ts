@@ -59,6 +59,9 @@ export class Seller {
       throw new InvalidSellerStatusError('Seller cannot be approved from current status');
     }
     this.status = SellerStatus.APPROVED;
+    this.domainEvents.push(
+      new SellerApprovedEvent({ id: this.sellerId.value, occurredAt: new Date() }),
+    );
   }
 
   suspend(): void {
