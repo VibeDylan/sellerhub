@@ -1,6 +1,6 @@
 export interface SellerApprovedEventPayload {
   id: string;
-  occuredAt: Date;
+  occurredAt: Date;
 }
 
 export class SellerApprovedEvent {
@@ -10,6 +10,6 @@ export class SellerApprovedEvent {
 
   constructor(payload: SellerApprovedEventPayload) {
     this.id = payload.id;
-    this.occurredAt = payload.occuredAt;
+    this.occurredAt = payload.occurredAt;
   }
 }
