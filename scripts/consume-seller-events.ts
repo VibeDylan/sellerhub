@@ -17,10 +17,14 @@ async function main() {
         return;
       }
       const raw = message.value.toString('utf-8');
-      const event = JSON.parse(raw);
 
-      console.log('Type :', event.type);
-      console.log('Payload :', event.payload);
+      try {
+        const event = JSON.parse(raw);
+        console.log('Type :', event.type);
+        console.log('Payload :', event.payload);
+      } catch (error) {
+        console.error('Message ignoré, JSON invalide :', raw, error);
+      }
     },
   });
 }
