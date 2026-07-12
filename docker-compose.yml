@@ -13,8 +13,6 @@ services:
     ports:
       - '9092:9092'
     environment:
-      # Deux listeners applicatifs : PLAINTEXT pour l'hôte (localhost:9092),
-      # INTERNAL pour les autres containers du réseau docker (kafka:29092).
       - KAFKA_NODE_ID=1
       - KAFKA_PROCESS_ROLES=broker,controller
       - KAFKA_LISTENERS=PLAINTEXT://:9092,INTERNAL://:29092,CONTROLLER://:9093
